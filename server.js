@@ -75,10 +75,8 @@ app.post('/calculate-risk', (req, res) => {
     if (familyHistory && familyHistory.length > 0 && familyHistory[0] !== "none") {
         familyHistoryPoints = 10 * familyHistory.length;
     }
-
     // Calculate total risk score
     const totalRiskScore = agePoints + (bmiCategory === 'normal' ? 0 : (bmiCategory === 'overweight' ? 30 : 75)) + bpPoints + familyHistoryPoints;
-
     // Determine risk category
     let riskCategory = 'low risk';
     if (totalRiskScore <= 50) {
