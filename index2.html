@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Risk Calculator</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f7f7f7;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+
+        form {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        label {
+            font-weight: bold;
+            margin-top: 10px;
+            display: block;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin: 8px 0;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        .result {
+            background-color: #ecf0f1;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+
+        .review {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .review p {
+            margin: 8px 0;
+        }
+
+        .review button {
+            background-color: #2ecc71;
+        }
+    </style>
+</head>
+<body>
+    <h1>Health Risk Calculator</h1>
+    <form id="healthForm">
+        <label for="age">Age (in years):</label>
+        <input type="number" id="age" required><br>
+
+        <label for="weight">Weight (in kg/lbs):</label>
+        <input type="number" id="weight" required><br>
+
+        <label for="height">Height (in cm/inches):</label>
+        <input type="number" id="height" required><br>
+
+        <label for="bloodPressure">Blood Pressure:</label>
+        <select id="bloodPressure" required>
+            <option value="normal">Normal</option>
+            <option value="elevated">Elevated</option>
+            <option value="stage1">Stage 1</option>
+            <option value="stage2">Stage 2</option>
+            <option value="crisis">Crisis</option>
+        </select><br>
+
+        <label for="familyHistory">Family History of Disease (Check all that apply):</label><br>
+        <input type="checkbox" id="diabetes" value="diabetes"> Diabetes<br>
+        <input type="checkbox" id="cancer" value="cancer"> Cancer<br>
+        <input type="checkbox" id="alzheimers" value="alzheimers"> Alzheimer’s<br>
+        <input type="checkbox" id="none" value="none"> None<br>
+
+        <label for="units">Units:</label>
+        <select id="units" required>
+            <option value="metric">Metric (kg, cm)</option>
+            <option value="us">US (lbs, inches)</option>
+        </select><br>
+
+        <button type="button" onclick="showSummary()">Review Inputs</button>
+    </form>
+
+    <div id="reviewSection" class="review" style="display:none;">
+        <h3>Please confirm your details:</h3>
+        <div id="summary"></div>
+        <label>
+            <input type="checkbox" id="confirmDetails"> I confirm that the information provided is accurate.
+        </label><br>
+        <button id="submitButton" style="display:none;">Submit</button>
+    </div>
+
+    <div id="result" class="result" style="display:none;"></div>
+
+    <script>
+        const API_BASE_URL = "https://healthriskcalculator-gbguhtfzcubde5b5.uaenorth-01.azurewebsites.net"; // Azure API base URL
+
+        // Show the summary for review
+        function showSummary() {
+            // Collect form values
+            const age = document.getElementById("age").value;
+            const weight = document.getElementById("weight").value;
+            const height = document.getElementById("height").value;
+
+            // Validate height to ensure it's at least 60 cm
+            if (parseFloat(height) < 60) {
+                alert("Height must be at least 60 cm.");
+                return; // Stop further processing
+            }
+
+            const bloodPressure = document.getElementById("bloodPressure").value;
+            const units = document.getElementById("units").value;
+
+            const familyHistory = [];
+            if (document.getElementById("diabetes").checked) familyHistory.push("Diabetes");
+            if (document.getElementById("cancer").checked) familyHistory.push("Cancer");
+            if (document.getElementById("alzheimers").checked) familyHistory.push("Alzheimer’s");
+            if (document.getElementById("none").checked) familyHistory.push("None");
+
+            // Display the summary in the review section
+            const summaryDiv = document.getElementById("summary");
+            summaryDiv.innerHTML = `
+                <p><strong>Age:</strong> ${age} years</p>
+                <p><strong>Weight:</strong> ${weight} kg</p>
+                <p><strong>Height:</strong> ${height} cm</p>
+                <p><strong>Blood Pressure:</strong> ${bloodPressure}</p>
+                <p><strong>Family History:</strong> ${familyHistory.join(", ")}</p>
+                <p><strong>Units:</strong> ${units}</p>
+            `;
+            document.getElementById("reviewSection").style.display = "block";
+
+            // Show submit button only if user confirms the details
+            document.getElementById("confirmDetails").addEventListener('change', function() {
+                document.getElementById("submitButton").style.display = this.checked ? 'block' : 'none';
+            });
+        }
+
+        // Handle the submit button click
+        document.getElementById("submitButton").addEventListener("click", function() {
+            // Get the form values again
+            const age = parseInt(document.getElementById("age").value);
+            const weight = parseFloat(document.getElementById("weight").value);
+            const height = parseFloat(document.getElementById("height").value);
+
+            // Ensure height is at least 60 cm
+            if (height < 60) {
+                alert("Height must be at least 60 cm.");
+                return; // Stop form submission if invalid height
+            }
+
+            const bloodPressure = document.getElementById("bloodPressure").value;
+            const units = document.getElementById("units").value;
+
+            const familyHistory = [];
+            if (document.getElementById("diabetes").checked) familyHistory.push("diabetes");
+            if (document.getElementById("cancer").checked) familyHistory.push("cancer");
+            if (document.getElementById("alzheimers").checked) familyHistory.push("Alzheimer’s");
+            if (document.getElementById("none").checked) familyHistory.push("none");
+
+            // Prepare the data to be sent to the server
+            const formData = { age, weight, height, bloodPressure, familyHistory, units };
+
+            // Send the data to the server (fetch request)
+            fetch(`${API_BASE_URL}/calculate-risk`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                const resultDiv = document.getElementById("result");
+                resultDiv.innerHTML = `
+                    <h3>Risk Calculation Result:</h3>
+                    <p><strong>BMI Category:</strong> ${data.bmiCategory}</p>
+                    <p><strong>Blood Pressure:</strong> ${data.bpCategory}</p>
+                    <p><strong>Risk Score:</strong> ${data.riskScore}</p>
+                    <p><strong>Risk Category:</strong> ${data.riskCategory}</p>
+                `;
+                resultDiv.style.display = "block";
+            })
+            .catch(error => {
+                const resultDiv = document.getElementById("result");
+                resultDiv.innerHTML = `<p style="color: red;">An error occurred: ${error.message}</p>`;
+                resultDiv.style.display = "block";
+                console.error('Error:', error); // Log error to console for debugging
+            });
+        });
+    </script>
+</body>
+</html>
