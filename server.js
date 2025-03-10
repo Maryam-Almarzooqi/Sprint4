@@ -1,17 +1,11 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const path = require('path');
 
 const app = express();
-const port = process.env.PORT || 3000; // Use the environment port if available (for Azure)
-
-const API_BASE_URL = "https://healthriskcalculator-gbguhtfzcubde5b5.uaenorth-01.azurewebsites.net"; // Azure API base URL
+const port = process.env.PORT || 8080; // Azure requires port 8080
 
 // Middleware to parse JSON request body
 app.use(bodyParser.json());
-
-// Serve static files from the 'public' directory (if applicable)
-app.use(express.static(path.join(__dirname, 'public')));
 
 // API route to calculate risk based on user inputs
 app.post('/calculate-risk', (req, res) => {
@@ -24,70 +18,39 @@ app.post('/calculate-risk', (req, res) => {
 
     // Convert weight and height if units are US
     if (units === 'us') {
-        weight = weight * 2.20462; // kg to lbs
-        height = height * 0.393701; // cm to inches
+        weight = weight / 2.20462; // Convert lbs to kg
+        height = height * 2.54; // Convert inches to cm
     }
 
     // BMI Calculation (using metric units)
-    const heightInMeters = height / 100; // Convert cm to meters for BMI calculation
+    const heightInMeters = height / 100;
     const bmi = weight / (heightInMeters * heightInMeters);
-    let bmiCategory = 'normal';
-    if (bmi >= 25 && bmi < 30) {
-        bmiCategory = 'overweight';
-    } else if (bmi >= 30) {
-        bmiCategory = 'obese';
-    }
+    let bmiCategory = bmi >= 30 ? 'obese' : bmi >= 25 ? 'overweight' : 'normal';
 
     // Age-based points
-    let agePoints = 0;
-    if (age < 30) {
-        agePoints = 0;
-    } else if (age < 45) {
-        agePoints = 10;
-    } else if (age < 60) {
-        agePoints = 20;
-    } else {
-        agePoints = 30;
-    }
+    let agePoints = age < 30 ? 0 : age < 45 ? 10 : age < 60 ? 20 : 30;
 
     // Blood Pressure-based points
-    let bpPoints = 0;
-    switch (bloodPressure) {
-        case 'normal':
-            bpPoints = 0;
-            break;
-        case 'elevated':
-            bpPoints = 15;
-            break;
-        case 'stage1':
-            bpPoints = 30;
-            break;
-        case 'stage2':
-            bpPoints = 75;
-            break;
-        case 'crisis':
-            bpPoints = 100;
-            break;
-    }
+    const bpPoints = {
+        normal: 0,
+        elevated: 15,
+        stage1: 30,
+        stage2: 75,
+        crisis: 100
+    }[bloodPressure] || 0;
 
     // Family History-based points
-    let familyHistoryPoints = 0;
-    if (familyHistory && familyHistory.length > 0 && familyHistory[0] !== "none") {
-        familyHistoryPoints = 10 * familyHistory.length;
-    }
-    // Calculate total risk score
-    const totalRiskScore = agePoints + (bmiCategory === 'normal' ? 0 : (bmiCategory === 'overweight' ? 30 : 75)) + bpPoints + familyHistoryPoints;
-    // Determine risk category
-    let riskCategory = 'low risk';
-    if (totalRiskScore <= 50) {
-        riskCategory = 'moderate risk';
-    } else if (totalRiskScore <= 75) {
-        riskCategory = 'high risk';
-    } else {
-        riskCategory = 'uninsurable';
-    }
+    let familyHistoryPoints = (familyHistory && familyHistory.length > 0 && familyHistory[0] !== "none")
+        ? 10 * familyHistory.length
+        : 0;
 
-    // Send response with all necessary data
+    // Calculate total risk score
+    const totalRiskScore = agePoints + (bmiCategory === 'normal' ? 0 : bmiCategory === 'overweight' ? 30 : 75) + bpPoints + familyHistoryPoints;
+
+    // Determine risk category
+    let riskCategory = totalRiskScore <= 50 ? 'moderate risk' : totalRiskScore <= 75 ? 'high risk' : 'uninsurable';
+
+    // Send response
     res.json({
         bmiCategory,
         bpCategory: bloodPressure,
@@ -96,13 +59,7 @@ app.post('/calculate-risk', (req, res) => {
     });
 });
 
-// Catch-all for any undefined GET requests (optional)
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html')); // Serve your HTML file (adjust the path if needed)
-});
-
 // Start server
-app.listen(port, () => {
-    console.log(`Server is running at https://localhost:${port}`); // Local server for development
+app.listen(port, '0.0.0.0', () => {
+    console.log(`Server is running on port ${port}`);
 });
-
