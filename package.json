@@ -1,0 +1,16 @@
+{
+  "name": "mimi",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+"test":"echo\"Please Work\""},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "axios": "^1.8.1",
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
+  }
+}
