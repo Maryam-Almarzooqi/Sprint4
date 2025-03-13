@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-"test":"echo \"Please Work\""},
+"run":"node server.js"},
   "keywords": [],
   "author": "",
   "license": "ISC",
