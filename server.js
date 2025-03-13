@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 
 const app = express();
 const port = process.env.PORT || 8080; // Azure requires port 8080
-
+var corsOptions : {optionsSuccessStatus: number, origin: string} = { origin = '*', optionSuccessStatus: 200 }
 // Middleware to parse JSON request body
 app.use(bodyParser.json());
 
