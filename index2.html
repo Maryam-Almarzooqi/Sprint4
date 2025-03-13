@@ -119,7 +119,9 @@
         <label>
             <input type="checkbox" id="confirmDetails"> I confirm that the information provided is accurate.
         </label><br>
-        <button id="submitButton" style="display:none;">Submit</button>
+        <button id="submitButton" onclick="CalcRisk()">Submit</button>
+
+        CalcRisk()
     </div>
 
     <div id="result" class="result" style="display:none;"></div>
@@ -194,18 +196,15 @@
             const formData = { age, weight, height, bloodPressure, familyHistory, units };
 
             // Send the data to the server (fetch request)
-            fetch(`${API_BASE_URL}/calculate-risk`, {
+            async function CalcRisk(){
+                try{
+           const response= await fetch(`${API_BASE_URL}/calculate-risk`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
+
+                    if(response.ok){
                 const resultDiv = document.getElementById("result");
                 resultDiv.innerHTML = `
                     <h3>Risk Calculation Result:</h3>
@@ -215,14 +214,26 @@
                     <p><strong>Risk Category:</strong> ${data.riskCategory}</p>
                 `;
                 resultDiv.style.display = "block";
-            })
-            .catch(error => {
+                    }else{
+                       throw new Error(`HTTP error! Status: ${response.status}`); 
+                    }
+                    
+
+                    return response.json(); 
+
+                }  .catch(error => {
                 const resultDiv = document.getElementById("result");
                 resultDiv.innerHTML = `<p style="color: red;">An error occurred: ${error.message}</p>`;
                 resultDiv.style.display = "block";
                 console.error('Error:', error); // Log error to console for debugging
             });
         });
+
+        function displayAPIInfo(){
+            document.getElementById("api-info").textContent = `Using API: ${API_BASE_URL}/roll`;
+        }
+
+        window.onload = displayAPIInfo;
     </script>
 </body>
 </html>
