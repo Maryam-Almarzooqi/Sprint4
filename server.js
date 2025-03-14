@@ -2,12 +2,14 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
+const cors=require('cors');
 
 const app = express();
 const port = process.env.PORT || 8080; // Use the environment port if available (for Azure)
 
 const API_BASE_URL = "https://healthriskcalculator-gbguhtfzcubde5b5.uaenorth-01.azurewebsites.net"; // Azure API base URL
 
+app.use(cors());
 // Middleware to parse JSON request body
 app.use(bodyParser.json());
 
