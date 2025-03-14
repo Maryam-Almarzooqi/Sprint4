@@ -101,7 +101,7 @@ app.post('/calculate-risk', (req, res) => {
 
 // Catch-all for any undefined GET requests (optional)
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html')); // Serve your HTML file (adjust the path if needed)
+    res.sendFile(path.join(__dirname, 'index2.html')); // Serve your HTML file (adjust the path if needed)
 });
 
 // Start server
