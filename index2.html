@@ -9,25 +9,29 @@
         body {
             font-family: Arial, sans-serif;
             padding: 20px;
-            background-color: #f7f7f7;
+            background-color: #c3dfe0;
         }
+
         h1 {
             text-align: center;
             color: #2c3e50;
         }
-        form {
+
+        form, .result, .review {
             background-color: white;
-            padding: 20px;
+            padding: 40px;
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             max-width: 500px;
-            margin: 0 auto;
+            margin: 0 auto 20px auto; /* Adds space between stacked elements */
         }
+
         label {
             font-weight: bold;
             margin-top: 10px;
             display: block;
         }
+
         input, select {
             width: 100%;
             padding: 8px;
@@ -35,8 +39,17 @@
             border-radius: 4px;
             border: 1px solid #ccc;
         }
+
+        /* Added margin to move checkbox downward */
+        .checkbox-container {
+            margin-top: 15px; /* Adjust this value as needed */
+            display: flex;
+            align-items: center;
+            gap: 10px; /* Adds space between checkbox and text */
+        }
+
         button {
-            background-color: #3498db;
+            background-color: #10b6bf;
             color: white;
             padding: 10px 20px;
             border: none;
@@ -44,26 +57,17 @@
             cursor: pointer;
             width: 100%;
         }
+
         button:hover {
-            background-color: #2980b9;
+            background-color: #0d919a;
         }
-        .result {
-            background-color: #ecf0f1;
-            padding: 20px;
-            margin-top: 20px;
-            border-radius: 5px;
-        }
-        .review {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #fff;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .review p {
-            margin: 8px 0;
-        }
+
         .review button {
-            background-color: #2ecc71;
+            background-color: #10b6bf;
+        }
+
+        .review button:hover {
+            background-color: #0d919a;
         }
     </style>
 </head>
@@ -89,10 +93,24 @@
         </select><br>
 
         <label for="familyHistory">Family History of Disease:</label><br>
-        <input type="checkbox" id="diabetes" value="diabetes"> Diabetes<br>
-        <input type="checkbox" id="cancer" value="cancer"> Cancer<br>
-        <input type="checkbox" id="alzheimers" value="alzheimers"> Alzheimer’s<br>
-        <input type="checkbox" id="none" value="none"> None<br>
+        <table>
+    <tr>
+        <td>Diabetes</td>
+        <td><input type="checkbox" id="diabetes" value="diabetes"> </td>
+    </tr>
+    <tr>
+        <td>Cancer</td>
+        <td><input type="checkbox" id="cancer" value="cancer"> </td>
+    </tr>
+    <tr>
+        <td>Alzheimer’s</td>
+        <td><input type="checkbox" id="alzheimers" value="alzheimers"> </td>
+    </tr>
+    <tr>
+        <td>None</td>
+        <td><input type="checkbox" id="none" value="none"> </td>
+    </tr>
+</table>
 
         <label for="units">Units:</label>
         <select id="units" required>
@@ -106,9 +124,13 @@
     <div id="reviewSection" class="review" style="display:none;">
         <h3>Please confirm your details:</h3>
         <div id="summary"></div>
-        <label>
-            <input type="checkbox" id="confirmDetails"> I confirm that the information provided is accurate.
-        </label><br>
+
+        <!-- Added container to fix spacing -->
+        <div class="checkbox-container">
+            <input type="checkbox" id="confirmDetails">
+            <label for="confirmDetails"><strong>I confirm that the information provided is accurate.</strong></label>
+        </div>
+
         <button id="submitButton" style="display:none;" onclick="CalcRisk()">Submit</button>
     </div>
 
@@ -162,13 +184,13 @@
             };
 
             try {
-                const response = await fetch(`${API_BASE_URL}/calculate-risk`, {
+                const response = await fetch(${API_BASE_URL}/calculate-risk, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(formData)
                 });
 
-                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                if (!response.ok) throw new Error(HTTP error! Status: ${response.status});
 
                 const data = await response.json();
                 document.getElementById("result").innerHTML = `
@@ -180,7 +202,7 @@
                 `;
                 document.getElementById("result").style.display = "block";
             } catch (error) {
-                document.getElementById("result").innerHTML = `<p style="color: red;">An error occurred: ${error.message}</p>`;
+                document.getElementById("result").innerHTML = <p style="color: red;">An error occurred: ${error.message}</p>;
                 document.getElementById("result").style.display = "block";
             }
         }
